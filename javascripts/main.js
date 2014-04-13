@@ -1,20 +1,52 @@
 console.log('This would be the main JS file.');
 $(function(){
-	var map = L.map('map', {crs: L.CRS.EPSG4326}).setView([0, 0], 1);
+
+ 	var Months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+ 	var currentYear=new Date().getFullYear();
+ 	var currentMonth=new Date().getMonth();
+ 	var defaultValues={min: new Date(currentYear, currentMonth, 1), max: new Date(currentYear, currentMonth+1,1)};
+
+	var map = L.map('map', {crs: L.CRS.EPSG4326,
+		minZoom:2
+		// ,zoomAnimation:false
+	}).setView([41.65, -0.883333], 5);
 	var osm = L.tileLayer.wms("http://ows.terrestris.de/osm/service", {
 		layers: 'OSM-WMS',
 		format: 'image/png',
 		attribution: "Hackers"
 		});
 	osm.addTo(map);
-	
-	var fireLayers=[];
 
- 	var Months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
- 	var currentYear=new Date().getFullYear();
- 	var currentMonth=new Date().getMonth();
- 	var defaultValues={min: new Date(currentYear, currentMonth, 1), max: new Date(currentYear, currentMonth+1,1)};
-	 $("#dateSlider").dateRangeSlider({
+	var actualLayer = L.tileLayer.wms("https://firms.modaps.eosdis.nasa.gov/wms/", {
+ 		layers: 'fires24',
+		format: 'image/png',
+		attribution: "Hackers"
+		});
+	actualLayer.addTo(map);
+
+	var fireLayers=L.layerGroup({});
+	L.control.layers({"actual":actualLayer,
+		"historico":fireLayers
+	}).addTo(map);
+
+	map.on('baselayerchange', function(event) {
+     if(event.layer == actualLayer) {
+         	$("#dateSlider").hide();
+         	fireLayers.clearLayers();
+	    }
+    if(event.layer == fireLayers) {
+         $("#dateSlider")
+         .show(400,function(){
+         	 $("#dateSlider").dateRangeSlider("resize");
+         });
+         
+		bindValuesChanged(null,{values:defaultValues});
+     }
+	});
+
+	 $("#dateSlider")
+	 .hide()
+	 .dateRangeSlider({
 	 	arrows:false,
         bounds: {min: new Date(currentYear, 0, 1), max: new Date(currentYear+1, 0, 1)},
         defaultValues: defaultValues,
@@ -31,28 +63,24 @@ $(function(){
             return Months[val.getMonth()];
           }
         }]
-      }).bind("valuesChanged", function(e, data){
+      }).bind("valuesChanged", bindValuesChanged);
+	return;
+	function bindValuesChanged(e, data){
 		console.log("Will be executed",data);
 		var minDate=data.values.min;
 		var maxDate=data.values.max;
-		removeFireLayers();
-		addFireLayersFromMaxMinDate(minDate,maxDate);
-	 });
-	addFireLayersFromMaxMinDate(defaultValues.min,defaultValues.max);
-	return;
+		fireLayers.clearLayers();
+		//map.removeLayer(fireLayers);
 
-      function removeFireLayers(){
-      	for (var i = fireLayers.length - 1; i >= 0; i--) {
-      		 map.removeLayer(fireLayers[i]);
-      	};
-      	fireLayers=[];
-      }
+		addFireLayersFromMaxMinDate(minDate,maxDate);
+		//map.addLayer(fireLayers);
+	 }
 
       function addFireLayersFromMaxMinDate(minDate,maxDate){
 			currentDate=new Date(minDate);
 			while(currentDate<maxDate){
 				addLayer(currentDate);
-				currentDate=new Date(currentDate.setDate(currentDate.getDate() + 1));
+				currentDate=new Date(currentDate.setDate(currentDate.getDate() + 7));
 			}
       }
 
@@ -67,8 +95,7 @@ $(function(){
 		format: 'image/png',
 		attribution: "Hackers"
 		});
-		layer.addTo(map);
-		fireLayers.push(layer);
+		fireLayers.addLayer(layer);
       }
 });
 

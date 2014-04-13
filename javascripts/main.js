@@ -25,8 +25,8 @@ $(function(){
 	actualLayer.addTo(map);
 
 	var fireLayers=L.layerGroup({});
-	L.control.layers({"actual":actualLayer,
-		"historico":fireLayers
+	L.control.layers({"Actual":actualLayer,
+		"Historico":fireLayers
 	}).addTo(map);
 
 	map.on('baselayerchange', function(event) {

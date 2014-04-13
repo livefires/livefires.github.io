@@ -1,6 +1,4 @@
 console.log('This would be the main JS file.');
-<<<<<<< HEAD
-=======
 $(function(){
 	var map = L.map('map', {crs: L.CRS.EPSG4326}).setView([0, 0], 1);
 	var osm = L.tileLayer.wms("http://ows.terrestris.de/osm/service", {
@@ -19,4 +17,3 @@ $(function(){
 
 
 });
->>>>>>> b4ec59a1b8ac61cc290b5fe54512893175e12397

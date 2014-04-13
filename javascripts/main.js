@@ -2,7 +2,7 @@ console.log('This would be the main JS file.');
 $(function(){
 
  	var Months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
- 	var currentYear=new Date().getFullYear()-1;
+ 	var currentYear=new Date().getFullYear()-2;
  	var currentMonth=new Date().getMonth();
  	var defaultValues={min: new Date(currentYear, currentMonth, 1), max: new Date(currentYear, currentMonth+1,1)};
 
